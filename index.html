@@ -3,49 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация на сервере</title>
+    <title>Игровой сервер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎮 Регистрация</h1>
-            <p>Зарегистрируйся на игровом сервере</p>
+            <h1>🎮 Игровой сервер</h1>
+            <p>Добро пожаловать!</p>
+        </div>
+
+        <!-- Главное меню -->
+        <div id="mainMenu" class="section active">
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="showLogin()">🔐 Вход</button>
+                <button class="menu-btn" onclick="showRegister()">🚀 Регистрация</button>
+            </div>
         </div>
 
         <!-- Форма регистрации -->
-        <div id="registration" class="form-section active">
+        <div id="registerSection" class="section">
+            <h2>Регистрация</h2>
             <div class="form-group">
-                <label for="nickname">Никнейм на сервере:</label>
-                <input type="text" id="nickname" placeholder="Введите ваш никнейм" maxlength="20">
+                <label for="regNickname">Никнейм на сервере:</label>
+                <input type="text" id="regNickname" placeholder="Придумайте никнейм" maxlength="20">
             </div>
             
             <div class="form-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" placeholder="Введите пароль">
+                <label for="regPassword">Пароль:</label>
+                <input type="password" id="regPassword" placeholder="Придумайте пароль">
             </div>
             
-            <button class="btn" onclick="register()">🚀 Зарегистрироваться</button>
+            <button class="btn" onclick="register()">✅ Зарегистрироваться</button>
+            <button class="btn-back" onclick="showMainMenu()">← Назад</button>
         </div>
 
-        <!-- Профиль после регистрации -->
-        <div id="profile" class="form-section">
+        <!-- Форма входа -->
+        <div id="loginSection" class="section">
+            <h2>Вход в аккаунт</h2>
+            <div class="form-group">
+                <label for="loginNickname">Никнейм:</label>
+                <input type="text" id="loginNickname" placeholder="Введите ваш никнейм">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Пароль:</label>
+                <input type="password" id="loginPassword" placeholder="Введите пароль">
+            </div>
+            
+            <button class="btn" onclick="login()">🔓 Войти</button>
+            <button class="btn-back" onclick="showMainMenu()">← Назад</button>
+        </div>
+
+        <!-- Профиль после входа/регистрации -->
+        <div id="profileSection" class="section">
             <div class="profile-card">
-                <h3>✅ Регистрация завершена!</h3>
+                <h2>✅ Успешный вход!</h2>
                 <div class="profile-info">
-                    <p><strong>Никнейм:</strong> <span id="displayNickname">-</span></p>
-                    <p><strong>Пароль:</strong> <span id="displayPassword">-</span></p>
-                    <p><strong>ID игрока:</strong> <span id="playerId">-</span></p>
-                    <p><strong>Дата регистрации:</strong> <span id="regDate">-</span></p>
+                    <p><strong>Никнейм:</strong> <span id="profileNickname">-</span></p>
+                    <p><strong>ID игрока:</strong> <span id="profileId">-</span></p>
+                    <p><strong>Статус:</strong> <span id="profileStatus">-</span></p>
+                    <p><strong>Дата регистрации:</strong> <span id="profileRegDate">-</span></p>
                 </div>
-                <button class="btn" onclick="editProfile()">✏️ Изменить данные</button>
+                <button class="btn" onclick="logout()">🚪 Выйти</button>
             </div>
         </div>
 
         <!-- Статус -->
         <div class="status">
-            <p>Статус: <span id="statusText">Не зарегистрирован</span></p>
+            <p id="statusText">Выберите действие</p>
         </div>
     </div>
 
