@@ -1,4 +1,94 @@
-\// Вход
+// Инициализация Telegram Web App
+let tg = window.Telegram.WebApp;
+tg.expand();
+tg.setHeaderColor('#f5576c');
+tg.setBackgroundColor('#f5576c');
+
+// Переменные
+let selectedRole = '';
+let hasVirtualCard = false;
+let currentUser = null;
+let allAccounts = JSON.parse(localStorage.getItem('allAccounts') || '{}');
+let accountsData = JSON.parse(localStorage.getItem('accountsData') || '{}');
+
+// Показать форму входа (по умолчанию)
+function showLoginForm() {
+    hideAllSections();
+    document.getElementById('loginSection').classList.add('active');
+    // Очищаем поля
+    document.getElementById('loginNickname').value = '';
+    document.getElementById('loginPassword').value = '';
+}
+
+// Показать форму регистрации
+function showRegisterForm() {
+    hideAllSections();
+    document.getElementById('registerSection').classList.add('active');
+    // Очищаем поля
+    document.getElementById('regNickname').value = '';
+    document.getElementById('regPassword').value = '';
+    // Сбрасываем выбор роли
+    selectedRole = '';
+    document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+}
+
+// Показать профиль
+function showProfile() {
+    hideAllSections();
+    document.getElementById('profileSection').classList.add('active');
+}
+
+// Показать страницу перевода
+function showTransferPage() {
+    hideAllSections();
+    document.getElementById('transferSection').classList.add('active');
+    
+    // Обновляем баланс
+    if (currentUser) {
+        const balance = currentUser.balance || 0;
+        document.getElementById('currentBalance').textContent = balance.toLocaleString();
+        document.getElementById('afterBalance').textContent = balance.toLocaleString();
+    }
+    
+    // Очищаем поля
+    document.getElementById('transferAmount').value = '';
+    document.getElementById('receiverNickname').value = '';
+}
+
+// Показать страницу управления балансом
+function showManageBalancePage() {
+    hideAllSections();
+    document.getElementById('manageBalanceSection').classList.add('active');
+    
+    // Очищаем поля
+    document.getElementById('targetNickname').value = '';
+    document.getElementById('balanceAmount').value = '';
+}
+
+// Выбор роли
+function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+}
+
+// Скрыть все секции
+function hideAllSections() {
+    document.querySelectorAll('.form-section').forEach(section => {
+        section.classList.remove('active');
+    });
+}
+
+// Проверка на английские символы и цифры
+function isEnglishAndNumbers(text) {
+    return /^[A-Za-z0-9]+$/.test(text);
+}
+
+// Вход
 function login() {
     const nickname = document.getElementById('loginNickname').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
@@ -131,6 +221,133 @@ function register() {
     tg.HapticFeedback.impactOccurred('medium');
 }
 
+// Получить отображаемое название роли
+function getRoleDisplayName(role) {
+    switch(role) {
+        case 'client': return '👤 Клиент банка';
+        case 'employee': return '💼 Работник банка';
+        default: return '👤 Пользователь';
+    }
+}
+
+// Создание виртуальной карты
+function createVirtualCard() {
+    if (!hasVirtualCard) {
+        // Создаем виртуальную карту
+        currentUser.hasVirtualCard = true;
+        currentUser.balance = 1000; // Начальный баланс
+        currentUser.cardNumber = '4276' + Math.floor(1000 + Math.random() * 9000) + '****' + Math.floor(1000 + Math.random() * 9000);
+        
+        // Сохраняем во все места
+        accountsData[currentUser.nickname.toLowerCase()] = currentUser;
+        localStorage.setItem('accountsData', JSON.stringify(accountsData));
+        localStorage.setItem('serverAccount', JSON.stringify(currentUser));
+        
+        hasVirtualCard = true;
+        updateCardButton();
+        
+        tg.showAlert('🎉 Виртуальная карта успешно создана!\nНачальный баланс: 1 000 дб');
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+}
+
+// Обновить кнопку создания карты/баланс
+function updateCardButton() {
+    const cardBtn = document.getElementById('createCardBtn');
+    if (hasVirtualCard) {
+        const balance = currentUser.balance || 1000;
+        cardBtn.innerHTML = `💳 Баланс: ${balance.toLocaleString()} дб`;
+        cardBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+        cardBtn.style.cursor = 'pointer';
+        cardBtn.onclick = showBalanceInfo;
+    } else {
+        cardBtn.innerHTML = '💳 Создать виртуальную карту';
+        cardBtn.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+        cardBtn.style.cursor = 'pointer';
+        cardBtn.onclick = createVirtualCard;
+    }
+}
+
+// Показать информацию о балансе
+function showBalanceInfo() {
+    const balance = currentUser.balance || 1000;
+    const cardNumber = currentUser.cardNumber || '4276 **** **** 1234';
+    
+    tg.showAlert(`💳 Информация о карте:\n\nНомер: ${cardNumber}\nБаланс: ${balance.toLocaleString()} дб\n\n💸 Используйте кнопки выше для операций`);
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+// Расчет баланса после перевода
+function calculateBalanceAfter() {
+    const amount = parseInt(document.getElementById('transferAmount').value) || 0;
+    const currentBalance = currentUser.balance || 0;
+    const afterBalance = currentBalance - amount;
+    
+    document.getElementById('afterBalance').textContent = afterBalance >= 0 ? afterBalance.toLocaleString() : '0';
+    
+    // Подсветка если недостаточно средств
+    const balanceAfterElement = document.getElementById('balanceAfter');
+    if (afterBalance < 0) {
+        balanceAfterElement.style.background = 'rgba(255, 107, 107, 0.1)';
+        balanceAfterElement.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+    } else {
+        balanceAfterElement.style.background = 'rgba(67, 233, 123, 0.1)';
+        balanceAfterElement.style.borderColor = 'rgba(67, 233, 123, 0.3)';
+    }
+}
+
+// Перевод денег
+function makeTransfer() {
+    const amount = parseInt(document.getElementById('transferAmount').value);
+    const receiverNickname = document.getElementById('receiverNickname').value.trim();
+    const currentBalance = currentUser.balance || 0;
+    
+    if (!amount || amount <= 0) {
+        tg.showAlert('❌ Введите корректную сумму!');
+        return;
+    }
+    
+    if (amount > currentBalance) {
+        tg.showAlert('❌ Недостаточно средств на счете!');
+        return;
+    }
+    
+    if (!receiverNickname) {
+        tg.showAlert('❌ Введите никнейм получателя!');
+        return;
+    }
+    
+    if (!isEnglishAndNumbers(receiverNickname)) {
+        tg.showAlert('❌ Никнейм получателя должен содержать только английские буквы и цифры!');
+        return;
+    }
+    
+    // Проверяем существует ли получатель
+    const receiverData = accountsData[receiverNickname.toLowerCase()];
+    if (!receiverData) {
+        tg.showAlert('❌ Получатель с таким никнеймом не найден!');
+        return;
+    }
+    
+    // Обновляем балансы
+    currentUser.balance -= amount;
+    receiverData.balance += amount;
+    
+    // Сохраняем изменения
+    accountsData[currentUser.nickname.toLowerCase()] = currentUser;
+    accountsData[receiverNickname.toLowerCase()] = receiverData;
+    localStorage.setItem('accountsData', JSON.stringify(accountsData));
+    localStorage.setItem('serverAccount', JSON.stringify(currentUser));
+    
+    updateCardButton();
+    
+    tg.showAlert(`✅ Перевод на сумму ${amount} дб пользователю ${receiverNickname} выполнен!\nНовый баланс: ${currentUser.balance.toLocaleString()} дб`);
+    tg.HapticFeedback.impactOccurred('medium');
+    
+    // Возвращаем в профиль
+    showProfile();
+}
+
 // Управление балансом (только для работников банка)
 function manageBalance() {
     const targetNickname = document.getElementById('targetNickname').value.trim();
@@ -165,7 +382,7 @@ function manageBalance() {
         case 'remove':
             if (amount > newBalance) {
                 newBalance = 0;
-                message = `➖ Убрано ${newBalance} дб у игрока ${targetNickname} (баланс обнулен)`;
+                message = `➖ Убрано ${targetData.balance} дб у игрока ${targetNickname} (баланс обнулен)`;
             } else {
                 newBalance -= amount;
                 message = `➖ Убрано ${amount} дб у игрока ${targetNickname}`;
@@ -197,11 +414,16 @@ function manageBalance() {
     document.getElementById('balanceAmount').value = '';
 }
 
-// Назначение обработчиков событий
+// Выход
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('serverAccount');
+    showLoginForm();
+    tg.showAlert('👋 До встречи!');
+}
+
+// Назначение обработчиков событий при загрузке
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработчик кнопки входа
-    document.querySelector('#loginSection .btn').addEventListener('click', login);
-    
     // Загружаем данные при старте
     allAccounts = JSON.parse(localStorage.getItem('allAccounts') || '{}');
     accountsData = JSON.parse(localStorage.getItem('accountsData') || '{}');
@@ -227,13 +449,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 hideAllSections();
                 document.getElementById('profileSection').classList.add('active');
-            } else {
-                showLoginForm();
+                return;
             }
         } catch (e) {
-            showLoginForm();
+            console.error('Error loading saved account:', e);
         }
-    } else {
-        showLoginForm();
     }
+    
+    // Если нет сохраненной сессии, показываем вход
+    showLoginForm();
 });
