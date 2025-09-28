@@ -286,6 +286,13 @@
             box-shadow: 0 8px 20px rgba(250, 112, 154, 0.4);
         }
 
+        .action-btn.balance {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
         /* Анимации */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -586,6 +593,7 @@
                 role: selectedRole,
                 playerId: 'PL' + Date.now().toString().slice(-8),
                 hasVirtualCard: false,
+                balance: 0,
                 registrationDate: new Date().toLocaleDateString('ru-RU')
             };
             
@@ -612,22 +620,6 @@
             }
         }
 
-        // Обновить кнопку создания карты
-        function updateCardButton() {
-            const cardBtn = document.getElementById('createCardBtn');
-            if (hasVirtualCard) {
-                cardBtn.innerHTML = '💳 Виртуальная карта создана';
-                cardBtn.style.background = 'linear-gradient(135deg, #868f96 0%, #596164 100%)';
-                cardBtn.style.cursor = 'not-allowed';
-                cardBtn.onclick = null;
-            } else {
-                cardBtn.innerHTML = '💳 Создать виртуальную карту';
-                cardBtn.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
-                cardBtn.style.cursor = 'pointer';
-                cardBtn.onclick = createVirtualCard;
-            }
-        }
-
         // Действия в профиле
         function transferMoney() {
             tg.showAlert('💸 Функция перевода денег скоро будет доступна!');
@@ -645,14 +637,47 @@
                 const savedAccount = localStorage.getItem('serverAccount');
                 const account = JSON.parse(savedAccount);
                 account.hasVirtualCard = true;
+                account.balance = 1000; // Начальный баланс
+                account.cardNumber = '4276' + Math.floor(1000 + Math.random() * 9000) + '****' + Math.floor(1000 + Math.random() * 9000);
                 localStorage.setItem('serverAccount', JSON.stringify(account));
                 
                 hasVirtualCard = true;
                 updateCardButton();
                 
-                tg.showAlert('🎉 Виртуальная карта успешно создана!\nНомер: 4276 **** **** 1234');
+                tg.showAlert('🎉 Виртуальная карта успешно создана!\nНачальный баланс: 1 000 ₽');
                 tg.HapticFeedback.impactOccurred('medium');
             }
+        }
+
+        // Обновить кнопку создания карты/баланс
+        function updateCardButton() {
+            const cardBtn = document.getElementById('createCardBtn');
+            if (hasVirtualCard) {
+                const savedAccount = localStorage.getItem('serverAccount');
+                const account = JSON.parse(savedAccount);
+                const balance = account.balance || 1000;
+                
+                cardBtn.innerHTML = `💳 Баланс: ${balance.toLocaleString()} ₽`;
+                cardBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+                cardBtn.style.cursor = 'pointer';
+                cardBtn.onclick = showBalanceInfo;
+            } else {
+                cardBtn.innerHTML = '💳 Создать виртуальную карту';
+                cardBtn.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+                cardBtn.style.cursor = 'pointer';
+                cardBtn.onclick = createVirtualCard;
+            }
+        }
+
+        // Показать информацию о балансе
+        function showBalanceInfo() {
+            const savedAccount = localStorage.getItem('serverAccount');
+            const account = JSON.parse(savedAccount);
+            const balance = account.balance || 1000;
+            const cardNumber = account.cardNumber || '4276 **** **** 1234';
+            
+            tg.showAlert(`💳 Информация о карте:\n\nНомер: ${cardNumber}\nБаланс: ${balance.toLocaleString()} ₽\n\n💸 Используйте кнопки выше для операций`);
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         // Выход
