@@ -1,4 +1,3 @@
-
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
 tg.expand();
@@ -429,9 +428,8 @@ document.addEventListener('DOMContentLoaded', function() {
     allAccounts = JSON.parse(localStorage.getItem('allAccounts') || '{}');
     accountsData = JSON.parse(localStorage.getItem('accountsData') || '{}');
     
-    // Назначаем обработчики на кнопки
-    document.querySelector('#loginSection .btn').addEventListener('click', login);
-    document.querySelector('.register-btn-large').addEventListener('click', showRegisterForm);
+    // Назначаем обработчики на ВСЕ кнопки
+    setupEventListeners();
     
     // Проверяем есть ли сохраненная сессия
     const savedAccount = localStorage.getItem('serverAccount');
@@ -465,7 +463,68 @@ document.addEventListener('DOMContentLoaded', function() {
     showLoginForm();
 });
 
-// Делаем функции глобальными для onclick атрибутов
+// Функция для настройки всех обработчиков событий
+function setupEventListeners() {
+    // Кнопка входа
+    const loginBtn = document.querySelector('#loginSection .btn');
+    if (loginBtn) loginBtn.addEventListener('click', login);
+    
+    // Кнопка регистрации в форме входа
+    const registerBtn = document.querySelector('.register-btn-large');
+    if (registerBtn) registerBtn.addEventListener('click', showRegisterForm);
+    
+    // Кнопка создания аккаунта
+    const createAccountBtn = document.querySelector('.btn-create');
+    if (createAccountBtn) createAccountBtn.addEventListener('click', register);
+    
+    // Кнопка перевода в профиле
+    const transferBtn = document.querySelector('.action-btn.transfer');
+    if (transferBtn) transferBtn.addEventListener('click', showTransferPage);
+    
+    // Кнопка управления балансом в профиле
+    const manageBalanceBtn = document.getElementById('manageBalanceBtn');
+    if (manageBalanceBtn) manageBalanceBtn.addEventListener('click', showManageBalancePage);
+    
+    // Кнопка подтверждения перевода
+    const confirmTransferBtn = document.querySelector('#transferSection .btn');
+    if (confirmTransferBtn) confirmTransferBtn.addEventListener('click', makeTransfer);
+    
+    // Кнопка выполнения управления балансом
+    const executeBalanceBtn = document.querySelector('#manageBalanceSection .btn');
+    if (executeBalanceBtn) executeBalanceBtn.addEventListener('click', manageBalance);
+    
+    // Кнопки "Назад"
+    const backButtons = document.querySelectorAll('.btn-back');
+    backButtons.forEach(btn => {
+        if (btn.closest('#registerSection')) {
+            btn.addEventListener('click', showLoginForm);
+        } else if (btn.closest('#transferSection') || btn.closest('#manageBalanceSection')) {
+            btn.addEventListener('click', showProfile);
+        } else if (btn.closest('#errorSection')) {
+            btn.addEventListener('click', showLoginForm);
+        }
+    });
+    
+    // Кнопка входа из успешной регистрации
+    const successLoginBtn = document.querySelector('#successSection .btn');
+    if (successLoginBtn) successLoginBtn.addEventListener('click', showLoginForm);
+    
+    // Кнопка регистрации из ошибки
+    const errorRegisterBtn = document.querySelector('#errorSection .btn-register');
+    if (errorRegisterBtn) errorRegisterBtn.addEventListener('click', showRegisterForm);
+    
+    // Кнопка выхода
+    const logoutBtn = document.querySelector('#profileSection .btn-back');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    
+    // Обработчик для поля суммы перевода
+    const transferAmountInput = document.getElementById('transferAmount');
+    if (transferAmountInput) {
+        transferAmountInput.addEventListener('input', calculateBalanceAfter);
+    }
+}
+
+// Делаем функции глобальными для onclick атрибутов в HTML
 window.showLoginForm = showLoginForm;
 window.showRegisterForm = showRegisterForm;
 window.showProfile = showProfile;
