@@ -657,10 +657,10 @@
                 return;
             }
 
-            // Получаем сохраненный аккаунт
-            const savedAccount = localStorage.getItem('serverAccount');
+            // Получаем данные аккаунта
+            const accountData = getAccountData(nickname);
             
-            if (!savedAccount) {
+            if (!accountData) {
                 // Показываем экран ошибки
                 hideAllSections();
                 document.getElementById('errorSection').classList.add('active');
@@ -668,21 +668,21 @@
                 return;
             }
 
-            const account = JSON.parse(savedAccount);
-            
-            if (account.nickname === nickname && account.password === password) {
+            if (accountData.nickname === nickname && accountData.password === password) {
                 // Успешный вход
-                currentUser = account;
-                document.getElementById('profileNickname').textContent = account.nickname;
-                document.getElementById('profileRole').textContent = getRoleDisplayName(account.role);
+                currentUser = accountData;
+                localStorage.setItem('serverAccount', JSON.stringify(accountData));
+                
+                document.getElementById('profileNickname').textContent = accountData.nickname;
+                document.getElementById('profileRole').textContent = getRoleDisplayName(accountData.role);
                 
                 // Проверяем есть ли виртуальная карта
-                hasVirtualCard = account.hasVirtualCard || false;
+                hasVirtualCard = accountData.hasVirtualCard || false;
                 updateCardButton();
                 
                 // Показываем кнопку управления балансом только для работников банка
                 const manageBalanceBtn = document.getElementById('manageBalanceBtn');
-                if (account.role === 'employee') {
+                if (accountData.role === 'employee') {
                     manageBalanceBtn.style.display = 'block';
                 } else {
                     manageBalanceBtn.style.display = 'none';
@@ -789,15 +789,15 @@
         function createVirtualCard() {
             if (!hasVirtualCard) {
                 // Создаем виртуальную карту
-                const savedAccount = localStorage.getItem('serverAccount');
-                const account = JSON.parse(savedAccount);
-                account.hasVirtualCard = true;
-                account.balance = 1000; // Начальный баланс
-                account.cardNumber = '4276' + Math.floor(1000 + Math.random() * 9000) + '****' + Math.floor(1000 + Math.random() * 9000);
+                const accountData = getAccountData(currentUser.nickname);
+                accountData.hasVirtualCard = true;
+                accountData.balance = 1000; // Начальный баланс
+                accountData.cardNumber = '4276' + Math.floor(1000 + Math.random() * 9000) + '****' + Math.floor(1000 + Math.random() * 9000);
                 
                 // Сохраняем во все места
-                localStorage.setItem('serverAccount', JSON.stringify(account));
-                saveAccountData(account.nickname, account);
+                saveAccountData(currentUser.nickname, accountData);
+                localStorage.setItem('serverAccount', JSON.stringify(accountData));
+                currentUser = accountData;
                 
                 hasVirtualCard = true;
                 updateCardButton();
@@ -811,10 +811,7 @@
         function updateCardButton() {
             const cardBtn = document.getElementById('createCardBtn');
             if (hasVirtualCard) {
-                const savedAccount = localStorage.getItem('serverAccount');
-                const account = JSON.parse(savedAccount);
-                const balance = account.balance || 1000;
-                
+                const balance = currentUser.balance || 1000;
                 cardBtn.innerHTML = `💳 Баланс: ${balance.toLocaleString()} дб`;
                 cardBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
                 cardBtn.style.cursor = 'pointer';
@@ -829,10 +826,8 @@
 
         // Показать информацию о балансе
         function showBalanceInfo() {
-            const savedAccount = localStorage.getItem('serverAccount');
-            const account = JSON.parse(savedAccount);
-            const balance = account.balance || 1000;
-            const cardNumber = account.cardNumber || '4276 **** **** 1234';
+            const balance = currentUser.balance || 1000;
+            const cardNumber = currentUser.cardNumber || '4276 **** **** 1234';
             
             tg.showAlert(`💳 Информация о карте:\n\nНомер: ${cardNumber}\nБаланс: ${balance.toLocaleString()} дб\n\n💸 Используйте кнопки выше для операций`);
             tg.HapticFeedback.impactOccurred('light');
@@ -841,7 +836,7 @@
         // Расчет баланса после перевода
         function calculateBalanceAfter() {
             const amount = parseInt(document.getElementById('transferAmount').value) || 0;
-            const currentBalance = parseInt(document.getElementById('currentBalance').textContent.replace(/\s/g, '')) || 0;
+            const currentBalance = currentUser.balance || 0;
             const afterBalance = currentBalance - amount;
             
             document.getElementById('afterBalance').textContent = afterBalance >= 0 ? afterBalance.toLocaleString() : '0';
@@ -861,7 +856,7 @@
         function makeTransfer() {
             const amount = parseInt(document.getElementById('transferAmount').value);
             const receiverNickname = document.getElementById('receiverNickname').value.trim();
-            const currentBalance = parseInt(document.getElementById('currentBalance').textContent.replace(/\s/g, '')) || 0;
+            const currentBalance = currentUser.balance || 0;
             
             if (!amount || amount <= 0) {
                 tg.showAlert('❌ Введите корректную сумму!');
@@ -890,22 +885,18 @@
                 return;
             }
             
-            // Получаем данные отправителя
-            const senderData = getAccountData(currentUser.nickname);
-            
             // Обновляем балансы
-            senderData.balance -= amount;
+            currentUser.balance -= amount;
             receiverData.balance += amount;
             
             // Сохраняем изменения
-            saveAccountData(currentUser.nickname, senderData);
+            saveAccountData(currentUser.nickname, currentUser);
             saveAccountData(receiverNickname, receiverData);
+            localStorage.setItem('serverAccount', JSON.stringify(currentUser));
             
-            // Обновляем текущий аккаунт
-            localStorage.setItem('serverAccount', JSON.stringify(senderData));
             updateCardButton();
             
-            tg.showAlert(`✅ Перевод на сумму ${amount} дб пользователю ${receiverNickname} выполнен!`);
+            tg.showAlert(`✅ Перевод на сумму ${amount} дб пользователю ${receiverNickname} выполнен!\nНовый баланс: ${currentUser.balance.toLocaleString()} дб`);
             tg.HapticFeedback.impactOccurred('medium');
             
             // Возвращаем в профиль
@@ -945,5 +936,10 @@
                     break;
                 case 'remove':
                     if (amount > newBalance) {
-                       
-
+                        newBalance = 0;
+                        message = `➖ Убрано ${amount} дб у игрока ${targetNickname} (баланс обнулен)`;
+                    } else {
+                        newBalance -= amount;
+                        message = `➖ Убрано ${amount} дб у игрока ${targetNickname}`;
+                    }
+                   
