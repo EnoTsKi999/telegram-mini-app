@@ -89,33 +89,86 @@
             box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3);
         }
 
+        /* Выбор роли */
+        .role-selection {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .role-btn {
+            flex: 1;
+            background: rgba(102, 126, 234, 0.1);
+            border: 3px solid #667eea;
+            padding: 20px 15px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .role-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .role-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
         /* Кнопки */
         .btn {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border: none;
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 18px;
+            padding: 25px 30px;
+            border-radius: 20px;
+            font-size: 20px;
             font-weight: 700;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(245, 87, 108, 0.6);
         }
 
         .btn-register {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            font-size: 22px;
+            padding: 30px;
+            min-height: 80px;
         }
 
         .btn-register:hover {
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            font-size: 22px;
+            padding: 30px;
+            min-height: 80px;
+        }
+
+        .btn-create:hover {
             box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
         }
 
@@ -123,13 +176,17 @@
             background: rgba(245, 87, 108, 0.1);
             color: #f5576c;
             border: 2px solid #f5576c;
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            font-size: 18px;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
             font-weight: 600;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-back:hover {
@@ -213,6 +270,31 @@
         .no-account p {
             margin-bottom: 15px;
             font-weight: 600;
+            font-size: 16px;
+        }
+
+        .register-btn-large {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 25px 30px;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-btn-large:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
         }
     </style>
 </head>
@@ -236,11 +318,11 @@
                 <input type="password" id="loginPassword" placeholder="Введи пароль">
             </div>
             
-            <button class="btn" onclick="login()">🚀 Войти на сервер</button>
+            <button class="btn">🚀 Войти на сервер</button>
 
             <div class="no-account">
                 <p>🎯 Ещё нет аккаунта?</p>
-                <button class="btn-register" onclick="showRegisterForm()">📝 Зарегистрироваться</button>
+                <button class="register-btn-large" onclick="showRegisterForm()">📝 Зарегистрироваться</button>
             </div>
         </div>
 
@@ -257,8 +339,21 @@
                 <label for="regPassword">🔒 Пароль:</label>
                 <input type="password" id="regPassword" placeholder="Не менее 4 символов">
             </div>
+
+            <!-- Выбор роли -->
+            <div class="form-group">
+                <label>🏦 Выберите роль:</label>
+                <div class="role-selection">
+                    <button class="role-btn" onclick="selectRole('client')">
+                        👤 Клиент банка
+                    </button>
+                    <button class="role-btn" onclick="selectRole('employee')">
+                        💼 Работник банка
+                    </button>
+                </div>
+            </div>
             
-            <button class="btn-register" onclick="register()">✅ Создать аккаунт</button>
+            <button class="btn-create" onclick="register()">✅ Создать аккаунт</button>
             <button class="btn-back" onclick="showLoginForm()">← Назад ко входу</button>
         </div>
 
@@ -268,6 +363,7 @@
                 <h3>🎉 Аккаунт создан!</h3>
                 <div class="card-content">
                     <p><strong>Никнейм:</strong> <span id="successNickname">-</span></p>
+                    <p><strong>Роль:</strong> <span id="successRole">-</span></p>
                     <p><strong>ID игрока:</strong> <span id="successId">-</span></p>
                     <p><strong>Статус:</strong> 🎮 Новый игрок</p>
                 </div>
@@ -281,6 +377,7 @@
                 <h3>🎉 Добро пожаловать!</h3>
                 <div class="card-content">
                     <p><strong>Никнейм:</strong> <span id="profileNickname">-</span></p>
+                    <p><strong>Роль:</strong> <span id="profileRole">-</span></p>
                     <p><strong>ID игрока:</strong> <span id="profileId">-</span></p>
                     <p><strong>Статус:</strong> <span id="profileStatus">-</span></p>
                     <p><strong>Вход выполнен:</strong> <span id="loginTime">-</span></p>
@@ -312,6 +409,9 @@
         tg.setHeaderColor('#f5576c');
         tg.setBackgroundColor('#f5576c');
 
+        // Переменные
+        let selectedRole = '';
+
         // Показать форму входа (по умолчанию)
         function showLoginForm() {
             hideAllSections();
@@ -330,6 +430,20 @@
             // Очищаем поля
             document.getElementById('regNickname').value = '';
             document.getElementById('regPassword').value = '';
+            // Сбрасываем выбор роли
+            selectedRole = '';
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        // Выбор роли
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
         }
 
         // Скрыть все секции
@@ -371,6 +485,7 @@
             if (account.nickname === nickname && account.password === password) {
                 // Успешный вход
                 document.getElementById('profileNickname').textContent = account.nickname;
+                document.getElementById('profileRole').textContent = getRoleDisplayName(account.role);
                 document.getElementById('profileId').textContent = account.playerId;
                 document.getElementById('profileStatus').textContent = account.status || '🎮 Игрок';
                 document.getElementById('loginTime').textContent = new Date().toLocaleTimeString();
@@ -402,6 +517,11 @@
                 return;
             }
             
+            if (!selectedRole) {
+                tg.showAlert('❌ Выбери роль!');
+                return;
+            }
+            
             if (nickname.length < 3) {
                 tg.showAlert('❌ Никнейм должен быть не менее 3 символов!');
                 return;
@@ -416,6 +536,7 @@
             const account = {
                 nickname: nickname,
                 password: password,
+                role: selectedRole,
                 playerId: 'PL' + Date.now().toString().slice(-8),
                 status: '🎮 Новый игрок',
                 registrationDate: new Date().toLocaleDateString('ru-RU')
@@ -425,6 +546,7 @@
             
             // Показываем успех
             document.getElementById('successNickname').textContent = nickname;
+            document.getElementById('successRole').textContent = getRoleDisplayName(selectedRole);
             document.getElementById('successId').textContent = account.playerId;
             
             hideAllSections();
@@ -435,14 +557,27 @@
             tg.HapticFeedback.impactOccurred('medium');
         }
 
+        // Получить отображаемое название роли
+        function getRoleDisplayName(role) {
+            switch(role) {
+                case 'client': return '👤 Клиент банка';
+                case 'employee': return '💼 Работник банка';
+                default: return '👤 Пользователь';
+            }
+        }
+
         // Выход
         function logout() {
             showLoginForm();
             tg.showAlert('👋 До встречи!');
         }
 
-        // Инициализация при загрузке - показываем вход
+        // Назначение обработчиков событий
         document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик кнопки входа
+            document.querySelector('#loginSection .btn').addEventListener('click', login);
+            
+            // Показываем форму входа при загрузке
             showLoginForm();
         });
     </script>
