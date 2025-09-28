@@ -240,16 +240,50 @@
             font-size: 16px;
         }
 
-        /* Статус */
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(245, 87, 108, 0.1);
-            border-radius: 12px;
-            text-align: center;
+        /* Кнопки действий в профиле */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 25px 20px;
+            border-radius: 15px;
+            font-size: 18px;
             font-weight: 600;
-            color: #333;
-            border: 2px solid rgba(245, 87, 108, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 70px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .action-btn.transfer {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .action-btn.deposit {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            box-shadow: 0 8px 20px rgba(67, 233, 123, 0.4);
+        }
+
+        .action-btn.card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            box-shadow: 0 8px 20px rgba(250, 112, 154, 0.4);
         }
 
         /* Анимации */
@@ -295,6 +329,22 @@
         .register-btn-large:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .user-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -365,24 +415,33 @@
                     <p><strong>Никнейм:</strong> <span id="successNickname">-</span></p>
                     <p><strong>Роль:</strong> <span id="successRole">-</span></p>
                     <p><strong>ID игрока:</strong> <span id="successId">-</span></p>
-                    <p><strong>Статус:</strong> 🎮 Новый игрок</p>
                 </div>
                 <button class="btn" onclick="showLoginForm()">🔓 Войти в аккаунт</button>
             </div>
         </div>
 
-        <!-- Успешный вход -->
+        <!-- Профиль с кнопками действий -->
         <div id="profileSection" class="form-section">
             <div class="profile-card">
-                <h3>🎉 Добро пожаловать!</h3>
-                <div class="card-content">
-                    <p><strong>Никнейм:</strong> <span id="profileNickname">-</span></p>
-                    <p><strong>Роль:</strong> <span id="profileRole">-</span></p>
-                    <p><strong>ID игрока:</strong> <span id="profileId">-</span></p>
-                    <p><strong>Статус:</strong> <span id="profileStatus">-</span></p>
-                    <p><strong>Вход выполнен:</strong> <span id="loginTime">-</span></p>
+                <div class="user-info">
+                    <h3>🎉 Добро пожаловать!</h3>
+                    <p><span id="profileNickname">-</span> | <span id="profileRole">-</span></p>
                 </div>
-                <button class="btn" onclick="logout()">🚪 Выйти</button>
+
+                <!-- Кнопки действий -->
+                <div class="action-buttons">
+                    <button class="action-btn transfer" onclick="transferMoney()">
+                        💸 Перевести
+                    </button>
+                    <button class="action-btn deposit" onclick="depositMoney()">
+                        💰 Положить деньги
+                    </button>
+                    <button class="action-btn card" id="createCardBtn" onclick="createVirtualCard()">
+                        💳 Создать виртуальную карту
+                    </button>
+                </div>
+
+                <button class="btn-back" onclick="logout()">🚪 Выйти</button>
             </div>
         </div>
 
@@ -395,11 +454,6 @@
                 <button class="btn-back" onclick="showLoginForm()" style="margin-top: 10px;">← Назад ко входу</button>
             </div>
         </div>
-
-        <!-- Статус -->
-        <div class="status">
-            <p id="statusText">Введи данные для входа в аккаунт</p>
-        </div>
     </div>
 
     <script>
@@ -411,12 +465,12 @@
 
         // Переменные
         let selectedRole = '';
+        let hasVirtualCard = false;
 
         // Показать форму входа (по умолчанию)
         function showLoginForm() {
             hideAllSections();
             document.getElementById('loginSection').classList.add('active');
-            updateStatus('Введи данные для входа в аккаунт');
             // Очищаем поля
             document.getElementById('loginNickname').value = '';
             document.getElementById('loginPassword').value = '';
@@ -426,7 +480,6 @@
         function showRegisterForm() {
             hideAllSections();
             document.getElementById('registerSection').classList.add('active');
-            updateStatus('Заполни форму регистрации');
             // Очищаем поля
             document.getElementById('regNickname').value = '';
             document.getElementById('regPassword').value = '';
@@ -453,11 +506,6 @@
             });
         }
 
-        // Обновить статус
-        function updateStatus(text) {
-            document.getElementById('statusText').textContent = text;
-        }
-
         // Вход
         function login() {
             const nickname = document.getElementById('loginNickname').value.trim();
@@ -475,7 +523,6 @@
                 // Показываем экран ошибки
                 hideAllSections();
                 document.getElementById('errorSection').classList.add('active');
-                updateStatus('Аккаунт не найден');
                 tg.HapticFeedback.impactOccurred('heavy');
                 return;
             }
@@ -486,13 +533,13 @@
                 // Успешный вход
                 document.getElementById('profileNickname').textContent = account.nickname;
                 document.getElementById('profileRole').textContent = getRoleDisplayName(account.role);
-                document.getElementById('profileId').textContent = account.playerId;
-                document.getElementById('profileStatus').textContent = account.status || '🎮 Игрок';
-                document.getElementById('loginTime').textContent = new Date().toLocaleTimeString();
+                
+                // Проверяем есть ли виртуальная карта
+                hasVirtualCard = account.hasVirtualCard || false;
+                updateCardButton();
                 
                 hideAllSections();
                 document.getElementById('profileSection').classList.add('active');
-                updateStatus('Вход выполнен успешно!');
                 
                 tg.showAlert(`✅ Привет, ${nickname}!`);
                 tg.HapticFeedback.impactOccurred('medium');
@@ -538,7 +585,7 @@
                 password: password,
                 role: selectedRole,
                 playerId: 'PL' + Date.now().toString().slice(-8),
-                status: '🎮 Новый игрок',
+                hasVirtualCard: false,
                 registrationDate: new Date().toLocaleDateString('ru-RU')
             };
             
@@ -551,7 +598,6 @@
             
             hideAllSections();
             document.getElementById('successSection').classList.add('active');
-            updateStatus('Аккаунт успешно создан!');
             
             tg.showAlert(`✅ Добро пожаловать, ${nickname}!`);
             tg.HapticFeedback.impactOccurred('medium');
@@ -563,6 +609,49 @@
                 case 'client': return '👤 Клиент банка';
                 case 'employee': return '💼 Работник банка';
                 default: return '👤 Пользователь';
+            }
+        }
+
+        // Обновить кнопку создания карты
+        function updateCardButton() {
+            const cardBtn = document.getElementById('createCardBtn');
+            if (hasVirtualCard) {
+                cardBtn.innerHTML = '💳 Виртуальная карта создана';
+                cardBtn.style.background = 'linear-gradient(135deg, #868f96 0%, #596164 100%)';
+                cardBtn.style.cursor = 'not-allowed';
+                cardBtn.onclick = null;
+            } else {
+                cardBtn.innerHTML = '💳 Создать виртуальную карту';
+                cardBtn.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+                cardBtn.style.cursor = 'pointer';
+                cardBtn.onclick = createVirtualCard;
+            }
+        }
+
+        // Действия в профиле
+        function transferMoney() {
+            tg.showAlert('💸 Функция перевода денег скоро будет доступна!');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function depositMoney() {
+            tg.showAlert('💰 Функция пополнения счета скоро будет доступна!');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function createVirtualCard() {
+            if (!hasVirtualCard) {
+                // Создаем виртуальную карту
+                const savedAccount = localStorage.getItem('serverAccount');
+                const account = JSON.parse(savedAccount);
+                account.hasVirtualCard = true;
+                localStorage.setItem('serverAccount', JSON.stringify(account));
+                
+                hasVirtualCard = true;
+                updateCardButton();
+                
+                tg.showAlert('🎉 Виртуальная карта успешно создана!\nНомер: 4276 **** **** 1234');
+                tg.HapticFeedback.impactOccurred('medium');
             }
         }
 
