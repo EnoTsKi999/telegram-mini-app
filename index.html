@@ -3,79 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игровой сервер</title>
+    <title>🎮 Регистрация на сервере</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; padding: 20px; color: white; 
+        }
+        .container { 
+            max-width: 400px; margin: 0 auto; 
+            background: rgba(255, 255, 255, 0.95); border-radius: 25px; 
+            padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            font-size: 28px; margin-bottom: 10px; 
+        }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
+        input { 
+            width: 100%; padding: 18px; border: 3px solid #e1e5e9; 
+            border-radius: 15px; font-size: 16px; background: white; color: #333; 
+            transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+        input:focus { 
+            outline: none; border-color: #667eea; transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3); 
+        }
+        .btn { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; border: none; padding: 20px 30px; border-radius: 15px; 
+            font-size: 18px; font-weight: 700; cursor: pointer; width: 100%; 
+            transition: all 0.3s; margin-bottom: 15px; 
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); 
+        }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-login { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4); 
+        }
+        .status { 
+            margin-top: 20px; padding: 15px; 
+            background: rgba(102, 126, 234, 0.1); border-radius: 12px; 
+            text-align: center; font-weight: 600; color: #333; 
+        }
+        .success-card { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            color: white; padding: 25px; border-radius: 20px; text-align: center; 
+            margin-top: 20px; box-shadow: 0 15px 30px rgba(79, 172, 254, 0.4); 
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎮 Игровой сервер</h1>
-            <p>Добро пожаловать!</p>
+            <h1>🚀 Регистрация</h1>
+            <p>Создай свой аккаунт на игровом сервере</p>
         </div>
 
-        <!-- Главное меню -->
-        <div id="mainMenu" class="section active">
-            <div class="menu-buttons">
-                <button class="menu-btn" onclick="showLogin()">🔐 Вход</button>
-                <button class="menu-btn" onclick="showRegister()">🚀 Регистрация</button>
+        <div id="registerSection">
+            <div class="form-group">
+                <label for="regNickname">🎮 Никнейм на сервере:</label>
+                <input type="text" id="regNickname" placeholder="Придумай крутой никнейм" maxlength="20">
             </div>
+            <div class="form-group">
+                <label for="regPassword">🔒 Пароль:</label>
+                <input type="password" id="regPassword" placeholder="Не менее 4 символов">
+            </div>
+            <button class="btn" onclick="register()">✅ Создать аккаунт</button>
+            <button class="btn btn-login" onclick="goToLogin()">🔐 Уже есть аккаунт?</button>
         </div>
 
-        <!-- Форма регистрации -->
-        <div id="registerSection" class="section">
-            <h2>Регистрация</h2>
-            <div class="form-group">
-                <label for="regNickname">Никнейм на сервере:</label>
-                <input type="text" id="regNickname" placeholder="Придумайте никнейм" maxlength="20">
-            </div>
-            
-            <div class="form-group">
-                <label for="regPassword">Пароль:</label>
-                <input type="password" id="regPassword" placeholder="Придумайте пароль">
-            </div>
-            
-            <button class="btn" onclick="register()">✅ Зарегистрироваться</button>
-            <button class="btn-back" onclick="showMainMenu()">← Назад</button>
-        </div>
-
-        <!-- Форма входа -->
-        <div id="loginSection" class="section">
-            <h2>Вход в аккаунт</h2>
-            <div class="form-group">
-                <label for="loginNickname">Никнейм:</label>
-                <input type="text" id="loginNickname" placeholder="Введите ваш никнейм">
-            </div>
-            
-            <div class="form-group">
-                <label for="loginPassword">Пароль:</label>
-                <input type="password" id="loginPassword" placeholder="Введите пароль">
-            </div>
-            
-            <button class="btn" onclick="login()">🔓 Войти</button>
-            <button class="btn-back" onclick="showMainMenu()">← Назад</button>
-        </div>
-
-        <!-- Профиль после входа/регистрации -->
-        <div id="profileSection" class="section">
-            <div class="profile-card">
-                <h2>✅ Успешный вход!</h2>
-                <div class="profile-info">
-                    <p><strong>Никнейм:</strong> <span id="profileNickname">-</span></p>
-                    <p><strong>ID игрока:</strong> <span id="profileId">-</span></p>
-                    <p><strong>Статус:</strong> <span id="profileStatus">-</span></p>
-                    <p><strong>Дата регистрации:</strong> <span id="profileRegDate">-</span></p>
+        <div id="successSection" style="display: none;">
+            <div class="success-card">
+                <h3>🎉 Аккаунт создан!</h3>
+                <div style="text-align: left; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 12px; margin: 15px 0;">
+                    <p><strong>Никнейм:</strong> <span id="successNickname">-</span></p>
+                    <p><strong>ID игрока:</strong> <span id="successId">-</span></p>
                 </div>
-                <button class="btn" onclick="logout()">🚪 Выйти</button>
+                <button class="btn" onclick="goToLogin()">🔓 Перейти ко входу</button>
             </div>
         </div>
 
-        <!-- Статус -->
         <div class="status">
-            <p id="statusText">Выберите действие</p>
+            <p id="statusText">Заполни форму регистрации</p>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function register() {
+            const nickname = document.getElementById('regNickname').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            
+            if (!nickname || !password) {
+                tg.showAlert('❌ Заполни все поля!');
+                return;
+            }
+            
+            const account = {
+                nickname: nickname,
+                password: password,
+                playerId: 'PL' + Date.now().toString().slice(-8)
+            };
+            
+            localStorage.setItem('serverAccount', JSON.stringify(account));
+            
+            document.getElementById('successNickname').textContent = nickname;
+            document.getElementById('successId').textContent = account.playerId;
+            document.getElementById('registerSection').style.display = 'none';
+            document.getElementById('successSection').style.display = 'block';
+            document.getElementById('statusText').textContent = 'Аккаунт создан!';
+            
+            tg.showAlert(`✅ Добро пожаловать, ${nickname}!`);
+        }
+
+        function goToLogin() {
+            window.location.href = 'https://enotski999.github.io/telegram-mini-app/login.html';
+        }
+    </script>
 </body>
 </html>
