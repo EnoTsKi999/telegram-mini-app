@@ -276,7 +276,7 @@
             box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
         }
 
-        .action-btn.deposit {
+        .action-btn.manage {
             background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
             box-shadow: 0 8px 20px rgba(67, 233, 123, 0.4);
         }
@@ -284,12 +284,6 @@
         .action-btn.card {
             background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             box-shadow: 0 8px 20px rgba(250, 112, 154, 0.4);
-        }
-
-        .action-btn.approve {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.4);
-            color: #333;
         }
 
         .action-btn.balance {
@@ -468,15 +462,12 @@
                     <button class="action-btn transfer" onclick="showTransferPage()">
                         💸 Перевести
                     </button>
-                    <button class="action-btn deposit" onclick="depositMoney()">
-                        💰 Положить деньги
-                    </button>
                     <button class="action-btn card" id="createCardBtn" onclick="createVirtualCard()">
                         💳 Создать виртуальную карту
                     </button>
-                    <!-- Кнопка подтверждения только для работников банка -->
-                    <button class="action-btn approve" id="approveBtn" onclick="approveTransactions()" style="display: none;">
-                        ✅ Подтверждение
+                    <!-- Кнопка управления балансом только для работников банка -->
+                    <button class="action-btn manage" id="manageBalanceBtn" onclick="showManageBalancePage()" style="display: none;">
+                        🏦 Управление балансом
                     </button>
                 </div>
 
@@ -489,14 +480,14 @@
             <h2 style="text-align: center; color: #333; margin-bottom: 25px;">💸 Перевод денег</h2>
             
             <div class="transfer-info">
-                <p>Ваш баланс: <span id="currentBalance">0</span> ₽</p>
+                <p>Ваш баланс: <span id="currentBalance">0</span> дб</p>
             </div>
 
             <div class="form-group">
                 <label for="transferAmount">💵 Сумма перевода:</label>
                 <input type="number" id="transferAmount" placeholder="Введите сумму" min="1" oninput="calculateBalanceAfter()">
                 <div class="balance-after" id="balanceAfter">
-                    После перевода: <span id="afterBalance">0</span> ₽
+                    После перевода: <span id="afterBalance">0</span> дб
                 </div>
             </div>
 
@@ -506,6 +497,33 @@
             </div>
             
             <button class="btn" onclick="makeTransfer()">✅ Подтвердить перевод</button>
+            <button class="btn-back" onclick="showProfile()">← Назад в профиль</button>
+        </div>
+
+        <!-- Управление балансом (только для работников банка) -->
+        <div id="manageBalanceSection" class="form-section">
+            <h2 style="text-align: center; color: #333; margin-bottom: 25px;">🏦 Управление балансом</h2>
+            
+            <div class="form-group">
+                <label for="targetNickname">👤 Никнейм игрока:</label>
+                <input type="text" id="targetNickname" placeholder="Введите никнейм игрока">
+            </div>
+
+            <div class="form-group">
+                <label for="balanceAction">📊 Действие:</label>
+                <select id="balanceAction" style="width: 100%; padding: 18px; border: 3px solid #e1e5e9; border-radius: 15px; font-size: 16px;">
+                    <option value="add">➕ Добавить дб</option>
+                    <option value="remove">➖ Убрать дб</option>
+                    <option value="set">⚡ Установить баланс</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="balanceAmount">💵 Сумма:</label>
+                <input type="number" id="balanceAmount" placeholder="Введите сумму" min="0">
+            </div>
+            
+            <button class="btn" onclick="manageBalance()">✅ Выполнить</button>
             <button class="btn-back" onclick="showProfile()">← Назад в профиль</button>
         </div>
 
@@ -532,6 +550,7 @@
         let hasVirtualCard = false;
         let currentUser = null;
         let allAccounts = JSON.parse(localStorage.getItem('allAccounts') || '{}');
+        let accountsData = JSON.parse(localStorage.getItem('accountsData') || '{}');
 
         // Показать форму входа (по умолчанию)
         function showLoginForm() {
@@ -581,6 +600,16 @@
             document.getElementById('receiverNickname').value = '';
         }
 
+        // Показать страницу управления балансом
+        function showManageBalancePage() {
+            hideAllSections();
+            document.getElementById('manageBalanceSection').classList.add('active');
+            
+            // Очищаем поля
+            document.getElementById('targetNickname').value = '';
+            document.getElementById('balanceAmount').value = '';
+        }
+
         // Выбор роли
         function selectRole(role) {
             selectedRole = role;
@@ -605,6 +634,17 @@
         // Проверка уникальности ника
         function isNicknameUnique(nickname) {
             return !allAccounts[nickname.toLowerCase()];
+        }
+
+        // Получить данные аккаунта по никнейму
+        function getAccountData(nickname) {
+            return accountsData[nickname.toLowerCase()];
+        }
+
+        // Сохранить данные аккаунта
+        function saveAccountData(nickname, data) {
+            accountsData[nickname.toLowerCase()] = data;
+            localStorage.setItem('accountsData', JSON.stringify(accountsData));
         }
 
         // Вход
@@ -640,12 +680,12 @@
                 hasVirtualCard = account.hasVirtualCard || false;
                 updateCardButton();
                 
-                // Показываем кнопку подтверждения только для работников банка
-                const approveBtn = document.getElementById('approveBtn');
+                // Показываем кнопку управления балансом только для работников банка
+                const manageBalanceBtn = document.getElementById('manageBalanceBtn');
                 if (account.role === 'employee') {
-                    approveBtn.style.display = 'block';
+                    manageBalanceBtn.style.display = 'block';
                 } else {
-                    approveBtn.style.display = 'none';
+                    manageBalanceBtn.style.display = 'none';
                 }
                 
                 hideAllSections();
@@ -710,8 +750,8 @@
             allAccounts[nickname.toLowerCase()] = true;
             localStorage.setItem('allAccounts', JSON.stringify(allAccounts));
 
-            // Сохраняем аккаунт
-            const account = {
+            // Сохраняем данные аккаунта
+            const accountData = {
                 nickname: nickname,
                 password: password,
                 role: selectedRole,
@@ -721,12 +761,13 @@
                 registrationDate: new Date().toLocaleDateString('ru-RU')
             };
             
-            localStorage.setItem('serverAccount', JSON.stringify(account));
+            saveAccountData(nickname, accountData);
+            localStorage.setItem('serverAccount', JSON.stringify(accountData));
             
             // Показываем успех
             document.getElementById('successNickname').textContent = nickname;
             document.getElementById('successRole').textContent = getRoleDisplayName(selectedRole);
-            document.getElementById('successId').textContent = account.playerId;
+            document.getElementById('successId').textContent = accountData.playerId;
             
             hideAllSections();
             document.getElementById('successSection').classList.add('active');
@@ -744,17 +785,7 @@
             }
         }
 
-        // Действия в профиле
-        function depositMoney() {
-            tg.showAlert('💰 Функция пополнения счета скоро будет доступна!');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function approveTransactions() {
-            tg.showAlert('✅ Функция подтверждения транзакций скоро будет доступна!');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
+        // Создание виртуальной карты
         function createVirtualCard() {
             if (!hasVirtualCard) {
                 // Создаем виртуальную карту
@@ -763,12 +794,15 @@
                 account.hasVirtualCard = true;
                 account.balance = 1000; // Начальный баланс
                 account.cardNumber = '4276' + Math.floor(1000 + Math.random() * 9000) + '****' + Math.floor(1000 + Math.random() * 9000);
+                
+                // Сохраняем во все места
                 localStorage.setItem('serverAccount', JSON.stringify(account));
+                saveAccountData(account.nickname, account);
                 
                 hasVirtualCard = true;
                 updateCardButton();
                 
-                tg.showAlert('🎉 Виртуальная карта успешно создана!\nНачальный баланс: 1 000 ₽');
+                tg.showAlert('🎉 Виртуальная карта успешно создана!\nНачальный баланс: 1 000 дб');
                 tg.HapticFeedback.impactOccurred('medium');
             }
         }
@@ -781,7 +815,7 @@
                 const account = JSON.parse(savedAccount);
                 const balance = account.balance || 1000;
                 
-                cardBtn.innerHTML = `💳 Баланс: ${balance.toLocaleString()} ₽`;
+                cardBtn.innerHTML = `💳 Баланс: ${balance.toLocaleString()} дб`;
                 cardBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
                 cardBtn.style.cursor = 'pointer';
                 cardBtn.onclick = showBalanceInfo;
@@ -800,7 +834,7 @@
             const balance = account.balance || 1000;
             const cardNumber = account.cardNumber || '4276 **** **** 1234';
             
-            tg.showAlert(`💳 Информация о карте:\n\nНомер: ${cardNumber}\nБаланс: ${balance.toLocaleString()} ₽\n\n💸 Используйте кнопки выше для операций`);
+            tg.showAlert(`💳 Информация о карте:\n\nНомер: ${cardNumber}\nБаланс: ${balance.toLocaleString()} дб\n\n💸 Используйте кнопки выше для операций`);
             tg.HapticFeedback.impactOccurred('light');
         }
 
@@ -850,40 +884,65 @@
             }
             
             // Проверяем существует ли получатель
-            if (!allAccounts[receiverNickname.toLowerCase()]) {
+            const receiverData = getAccountData(receiverNickname);
+            if (!receiverData) {
                 tg.showAlert('❌ Получатель с таким никнеймом не найден!');
                 return;
             }
             
-            // Здесь будет логика перевода
-            tg.showAlert(`✅ Перевод на сумму ${amount} ₽ пользователю ${receiverNickname} выполнен!`);
-            tg.HapticFeedback.impactOccurred('medium');
+            // Получаем данные отправителя
+            const senderData = getAccountData(currentUser.nickname);
             
-            // Обновляем баланс
-            const savedAccount = localStorage.getItem('serverAccount');
-            const account = JSON.parse(savedAccount);
-            account.balance = currentBalance - amount;
-            localStorage.setItem('serverAccount', JSON.stringify(account));
+            // Обновляем балансы
+            senderData.balance -= amount;
+            receiverData.balance += amount;
+            
+            // Сохраняем изменения
+            saveAccountData(currentUser.nickname, senderData);
+            saveAccountData(receiverNickname, receiverData);
+            
+            // Обновляем текущий аккаунт
+            localStorage.setItem('serverAccount', JSON.stringify(senderData));
+            updateCardButton();
+            
+            tg.showAlert(`✅ Перевод на сумму ${amount} дб пользователю ${receiverNickname} выполнен!`);
+            tg.HapticFeedback.impactOccurred('medium');
             
             // Возвращаем в профиль
             showProfile();
-            updateCardButton();
         }
 
-        // Выход
-        function logout() {
-            showLoginForm();
-            tg.showAlert('👋 До встречи!');
-        }
-
-        // Назначение обработчиков событий
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик кнопки входа
-            document.querySelector('#loginSection .btn').addEventListener('click', login);
+        // Управление балансом (только для работников банка)
+        function manageBalance() {
+            const targetNickname = document.getElementById('targetNickname').value.trim();
+            const action = document.getElementById('balanceAction').value;
+            const amount = parseInt(document.getElementById('balanceAmount').value);
             
-            // Показываем форму входа при загрузке
-            showLoginForm();
-        });
-    </script>
-</body>
-</html>
+            if (!targetNickname) {
+                tg.showAlert('❌ Введите никнейм игрока!');
+                return;
+            }
+            
+            if (!amount || amount < 0) {
+                tg.showAlert('❌ Введите корректную сумму!');
+                return;
+            }
+            
+            // Проверяем существует ли игрок
+            const targetData = getAccountData(targetNickname);
+            if (!targetData) {
+                tg.showAlert('❌ Игрок с таким никнеймом не найден!');
+                return;
+            }
+            
+            let newBalance = targetData.balance || 0;
+            let message = '';
+            
+            switch(action) {
+                case 'add':
+                    newBalance += amount;
+                    message = `➕ Добавлено ${amount} дб игроку ${targetNickname}`;
+                    break;
+                case 'remove':
+                    if (amount > newBalance) {
+                       
