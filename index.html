@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Мое Mini App</h1>
+            <p>Добро пожаловать в Telegram Mini App!</p>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Ваше имя:</label>
+            <input type="text" id="name" placeholder="Введите ваше имя">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Введите ваш email">
+        </div>
+
+        <div class="form-group">
+            <label for="message">Сообщение:</label>
+            <textarea id="message" placeholder="Введите ваше сообщение..."></textarea>
+        </div>
+
+        <button class="btn" onclick="sendData()">📨 Отправить данные в бота</button>
+
+        <div class="feature" onclick="showAlert()">
+            <h3>🎯 Быстрые действия</h3>
+            <p>Нажми для демонстрации</p>
+        </div>
+
+        <div class="stats">
+            <p><strong>📊 Статистика:</strong></p>
+            <p>Пользователей онлайн: <span id="onlineCount">1</span></p>
+            <p>Время: <span id="currentTime"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.setText("Готово").show();
+
+        // Обновляем время
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Отправка данных в бота
+        function sendData() {
+            const data = {
+                name: document.getElementById('name').value || 'Аноним',
+                email: document.getElementById('email').value || 'Не указан',
+                message: document.getElementById('message').value || 'Пустое сообщение'
+            };
+
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+
+        // Демо функция
+        function showAlert() {
+            alert('🎉 Это работает! Mini App активен!');
+        }
+
+        // Случайное количество онлайн
+        document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 100) + 1;
+    </script>
+</body>
+</html>
