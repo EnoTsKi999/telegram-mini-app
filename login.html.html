@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Вход на сервер</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px;
+            border: 3px solid #e1e5e9;
+            border-radius: 15px;
+            font-size: 16px;
+            background: white;
+            color: #333;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f5576c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(245, 87, 108, 0.6);
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-register:hover {
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(245, 87, 108, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border: 2px solid rgba(245, 87, 108, 0.2);
+        }
+
+        .profile-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #333;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 15px 30px rgba(255, 154, 158, 0.4);
+        }
+
+        .profile-card h3 {
+            margin-bottom: 15px;
+            font-size: 22px;
+            color: #d23669;
+        }
+
+        .profile-info {
+            text-align: left;
+            background: rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .profile-info p {
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .no-account {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Вход в аккаунт</h1>
+            <p>Войди на игровой сервер</p>
+        </div>
+
+        <!-- Форма входа -->
+        <div id="loginSection">
+            <div class="form-group">
+                <label for="loginNickname">🎮 Никнейм:</label>
+                <input type="text" id="loginNickname" placeholder="Введи свой никнейм">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">🔒 Пароль:</label>
+                <input type="password" id="loginPassword" placeholder="Введи пароль">
+            </div>
+            
+            <button class="btn" onclick="login()">🚀 Войти на сервер</button>
+            <button class="btn btn-register" onclick="goToRegister()">📝 Создать аккаунт</button>
+        </div>
+
+        <!-- Успешный вход -->
+        <div id="profileSection" style="display: none;">
+            <div class="profile-card">
+                <h3>🎉 Добро пожаловать!</h3>
+                <div class="profile-info">
+                    <p><strong>Никнейм:</strong> <span id="profileNickname">-</span></p>
+                    <p><strong>ID игрока:</strong> <span id="profileId">-</span></p>
+                    <p><strong>Статус:</strong> <span id="profileStatus">-</span></p>
+                    <p><strong>Вход выполнен:</strong> <span id="loginTime">-</span></p>
+                </div>
+                <button class="btn" onclick="logout()">🚪 Выйти</button>
+            </div>
+        </div>
+
+        <div class="status">
+            <p id="statusText">Введи данные для входа</p>
+        </div>
+
+        <div class="no-account" id="noAccountMessage" style="display: none;">
+            <p>😔 Аккаунт не найден</p>
+            <button class="btn btn-register" onclick="goToRegister()">📝 Зарегистрироваться</button>
+        </div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#f5576c');
+        tg.setBackgroundColor('#f5576c');
+
+        function login() {
+            const nickname = document.getElementById('loginNickname').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!nickname || !password) {
+                showAlert('❌ Заполни все поля!');
+                return;
+            }
+
+            // Получаем сохраненный аккаунт
+            const savedAccount = localStorage.getItem('serverAccount');
+            
+            if (!savedAccount) {
+                document.getElementById('noAccountMessage').style.display = 'block';
+                showAlert('❌ Аккаунт не найден! Зарегистрируйся сначала.');
+                tg.HapticFeedback.impactOccurred('heavy');
+                return;
+            }
+
+            const account = JSON.parse(savedAccount);
+            
+            if (account.nickname === nickname && account.password === password) {
+                // Успешный вход
+                document.getElementById('profileNickname').textContent = account.nickname;
+                document.getElementById('profileId').textContent = account.playerId;
+                document.getElementById('profileStatus').textContent = account.status;
+                document.getElementById('loginTime').textContent = new Date().toLocaleTimeString();
+                
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                document.getElementById('noAccountMessage').style.display = 'none';
+                document.getElementById('statusText').textContent = 'Вход выполнен!';
+                
+                showAlert(`✅ Привет, ${nickname}!`);
+                tg.HapticFeedback.impactOccurred('medium');
+            } else {
+                showAlert('❌ Неверный никнейм или пароль!');
+                tg.HapticFeedback.impactOccurred('heavy');
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('profileSection').style.display = 'none';
+            document.getElementById('loginNickname').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('statusText').textContent = 'Введи данные для входа';
+            showAlert('👋 До встречи!');
+        }
+
+        function goToRegister() {
+            // Переход на сайт регистрации
+            const registerUrl = 'https://enotski999.github.io/telegram-mini-app/register.html';
+            window.location.href = registerUrl;
+        }
+
+        function showAlert(message) {
+            tg.showAlert(message);
+        }
+    </script>
+</body>
+</html>
