@@ -558,3 +558,18 @@ function showRegisterForm() {
     // alert('Форма регистрации будет здесь');
     console.log('Register form function called');
 }
+
+function showRegisterForm() {
+    // Ваш код для показа формы регистрации
+    console.log("Форма регистрации открыта");
+    
+    // Пример: скрыть форму входа и показать форму регистрации
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'block';
+    
+    // Или просто покажите сообщение
+    // alert("Форма регистрации");
+}
