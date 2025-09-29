@@ -544,3 +544,17 @@ function showRegisterForm() {
     console.log("Register form should be shown");
     // Например: document.getElementById('registerForm').style.display = 'block';
 }
+function showRegisterForm() {
+    // Пример реализации - покажите форму регистрации
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    if (loginForm && registerForm) {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+    }
+    
+    // Или альтернативный вариант:
+    // alert('Форма регистрации будет здесь');
+    console.log('Register form function called');
+}
