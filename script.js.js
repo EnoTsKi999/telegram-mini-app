@@ -538,3 +538,9 @@ window.calculateBalanceAfter = calculateBalanceAfter;
 window.makeTransfer = makeTransfer;
 window.manageBalance = manageBalance;
 window.logout = logout;
+
+function showRegisterForm() {
+    // Ваш код для показа формы регистрации
+    console.log("Register form should be shown");
+    // Например: document.getElementById('registerForm').style.display = 'block';
+}
